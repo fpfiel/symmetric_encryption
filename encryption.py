@@ -29,7 +29,7 @@ def string_to_blocks(input_string, block_size=12):
     ascii_values = [ord(char) for char in input_string]
     
     binary_values = [format(ascii_val, '08b') for ascii_val in ascii_values]
-    
+
     binary_string = ''.join(binary_values)
     
     # when slicing in python with string[a:b] with b>len(string) python automatically cuts until the end of the string
@@ -41,12 +41,60 @@ def string_to_blocks(input_string, block_size=12):
     
     return blocks
 
+def enc_string_to_blocks(input_string, block_size=12):
+    ascii_values = [ord(char) for char in input_string]
+    
+    binary_values = [format(ascii_val, '08b') for ascii_val in ascii_values[:-1]]
+    
+    binary_values.append(format(ascii_values[-1], 'b'))
+
+    # sum_length_bin_values = sum(len(x) for x in binary_values)
+    sum_length_bin_values = (8 * (len(binary_values) -1)) + len(binary_values[-1])
+    length_mod_blocksize = sum_length_bin_values%12
+
+    fill_zeroes = 12 - (length_mod_blocksize) if length_mod_blocksize != 0 else 0
+
+    binary_values[-1] = binary_values[-1].rjust(fill_zeroes + len(binary_values[-1]), '0') #fill so mod 12 is null
+    
+    binary_string = ''.join(binary_values)
+    
+    blocks = [binary_string[i:i + block_size] for i in range(0, len(binary_string), block_size)]
+    
+    if len(blocks) > 0 and len(blocks[-1]) < block_size:
+        # this should not be reachable, padding should always be filled to 12 blocksize
+        blocks[-1] = blocks[-1].ljust(block_size, '0') # string.ljust(length, char) appends the char length-len(string) times so afterwards len(string) is equal to length 
+    
+    return blocks
+
 def blocks_to_string(blocks: list[str]):
     binary_string = ''.join(blocks)
 
     byte_values = [binary_string[i:i + 8] for i in range(0, len(binary_string), 8)]
 
-    ascii_characters = [chr(int(byte, 2)) for byte in byte_values if byte != '00000000'] # in case the last 8 bits got padded, dont add padded bits
+    # errornous, if first block is 8*'0' - then it gets cut
+    # ascii_characters = [chr(int(byte, 2)) for byte in byte_values if byte != '00000000' and byte != '0000'] # in case the last 8 bits got padded, dont add padded bits
+    ascii_characters = [chr(int(byte, 2)) for byte in byte_values[:-1]] # all bytes except the last one shall be appended no matter if only 0 or not
+
+    last_byte = byte_values[-1]
+    if last_byte != '00000000' and last_byte != '0000': #last byte could be padding byte without information
+        ascii_characters.append(chr(int(last_byte, 2)))
+    
+
+    return ''.join(ascii_characters)
+
+def enc_blocks_to_string(blocks: list[str]):
+    binary_string = ''.join(blocks)
+
+    byte_values = [binary_string[i:i + 8] for i in range(0, len(binary_string), 8)]
+
+    # errornous, if first block is 8*'0' - then it gets cut
+    # ascii_characters = [chr(int(byte, 2)) for byte in byte_values if byte != '00000000' and byte != '0000'] # in case the last 8 bits got padded, dont add padded bits
+    ascii_characters = [chr(int(byte, 2)) for byte in byte_values[:-1]] # all bytes except the last one shall be appended no matter if only 0 or not
+
+    # last_byte = byte_values[-1]
+    # if last_byte != '00000000' and last_byte != '0000': #last byte could be padding byte without information
+    #     ascii_characters.append(chr(int(last_byte, 2)))
+    
 
     return ''.join(ascii_characters)
 
@@ -63,7 +111,7 @@ def encryption(clear_text: str, key: str, rounds: int):
 
 def decryption(cipher_text: str, key: str, rounds: int):
     #do everything in the single rounds in reverse?
-    blocks = string_to_blocks(cipher_text)
+    blocks = enc_string_to_blocks(cipher_text)
 
     for i in reversed(range(rounds)):
         round_key = generate_roundkey(key, i)
