@@ -1,4 +1,4 @@
-from encryption import blocks_to_string, decryption, encryption, p_box, s_box, string_to_blocks, xor
+from encryption import blocks_to_string, decryption, enc_blocks_to_string, enc_string_to_blocks, encryption, p_box, s_box, string_to_blocks, xor
 import random
 
 ####### TESTS #######
@@ -17,26 +17,20 @@ def test_string_to_blocks_and_back():
     block_size = 12
     assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 1 failed."
 
-    # input, which length isnt exactly a multiple of blocksize
+    # input, with diffeten length
     input_string = "HELLO, WORLD 123"
-    block_size = 12
     assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 2 failed."
 
     # empty string
     input_string = ""
-    block_size = 12
     assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 3 empty string failed."
-
-    # different blocksizes
-    # input_string = "HELLO WORLD"
-    # for block_size in range(4, 16):
-    #     assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 4 failed at block_size={block_size}."
 
     # random string, random length <= 20
     input_string = "".join([chr(random.randint(32, 126)) for i in range(0, random.randint(1, 20))])
-    assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 5 random string."
+    assert input_string == blocks_to_string(string_to_blocks(input_string, block_size)), f"Test 4 random string {input_string} failed."
 
-    print("All tests string_to_blocks_and_back passed")
+    print("All tests string_to_blocks_and_back passed.")
+
 
 
 def test_p_box():
@@ -58,7 +52,7 @@ def test_p_box():
     block = "".join([str(random.randint(0, 1)) for i in range(12)])
     assert block == p_box(p_box(block, p_box=pbox_12), p_box=inverse_pbox_12), f"Test random block failed for block: {block}"
 
-    print("All p_box tests passed!")
+    print("All p_box tests passed.")
 
 
 def test_s_box():
@@ -122,7 +116,6 @@ def test_encryption_decryption():
     assert decrypted_val == input_string, f"Test with input length {len(input_string)} failed"
 
     input_string = "".join([chr(random.randint(32, 125)) for x in range(1, random.randint(2, 20))])
-    #print(input_string)
     encrypted_val = encryption(input_string, key, rounds)
     decrypted_val = decryption(encrypted_val, key, rounds)
     assert decrypted_val == input_string, f"Test with string={input_string} with length {len(input_string)} failed"
@@ -131,17 +124,21 @@ def test_encryption_decryption():
 
 
 def test_weird_behaviour():
-    #try_count = 100000 #134 in first run, 121 in second hits currently
+
+    # ran test with 100000 strings with length 1 to 200 and 0 errors - should work now 
+
     try_count = 100000  
     key='0111001010001001' #keylength? 
     rounds=3
 
+    string_max_length = 200
+    string_min_length = 1
+
     wrong_decrypts = []
 
     for i in range(try_count):
-        input_string = "".join([chr(random.randint(32, 125)) for x in range(1, random.randint(2, 20))])
+        input_string = "".join([chr(random.randint(32, 125)) for x in range(string_min_length, random.randint(string_min_length+1, string_max_length))])
         # input_string = "".join([chr(random.randint(32, 125))for x in range(0, 2)])
-
 
         #print(input_string)
         encrypted_val = encryption(input_string, key, rounds)
@@ -150,10 +147,6 @@ def test_weird_behaviour():
         if(input_string != decrypted_val):
             wrong_decrypts.append([input_string, encrypted_val, decrypted_val])
 
-
-    #print(wrong_decrypts[i][0] for i in range(len(wrong_decrypts)))
-
-    #stats = [0 for i in range(20)]
 
     for wd in wrong_decrypts:
         print(wd[0])
@@ -182,12 +175,11 @@ def test_temp():
 
 
 # Testaufrufe
-# test_string_to_blocks_and_back()
-# test_p_box()
-# test_s_box()
-# test_xor()
-#test_encryption_decryption()
+test_string_to_blocks_and_back()
+test_p_box()
+test_s_box()
+test_xor()
+test_encryption_decryption()
 
-test_weird_behaviour()
-
+#test_weird_behaviour()
 #test_temp()

@@ -10,7 +10,7 @@ print(f"input val: '{input_string}'; length: {len(input_string)}")
 print(f"key: '{key}; keylength: {len(key)}'")
 
 encrypted_val = encryption(input_string, key, rounds)
-print(f"encrypted val: '{encrypted_val}'")
+print("encrypted val:'", encrypted_val, "'")
 
 decrypted_val = decryption(encrypted_val, key, rounds)
 print(f"decrypted val: '{decrypted_val}'\n")

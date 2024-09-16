@@ -41,6 +41,23 @@ def string_to_blocks(input_string, block_size=12):
     
     return blocks
 
+
+def blocks_to_string(blocks: list[str]):
+    if(len(blocks) == 0): return ''
+
+    binary_string = ''.join(blocks)
+
+    byte_values = [binary_string[i:i + 8] for i in range(0, len(binary_string), 8)]
+
+    ascii_characters = [chr(int(byte, 2)) for byte in byte_values[:-1]] # all bytes except the last one shall be appended no matter if only 0 or not
+
+    last_byte = byte_values[-1]
+    if last_byte != '00000000' and last_byte != '0000': #last byte could be padding byte without information
+        ascii_characters.append(chr(int(last_byte, 2)))
+    
+    return ''.join(ascii_characters)
+
+
 def enc_string_to_blocks(input_string, block_size=12):
     ascii_values = [ord(char) for char in input_string]
     
@@ -66,35 +83,13 @@ def enc_string_to_blocks(input_string, block_size=12):
     
     return blocks
 
-def blocks_to_string(blocks: list[str]):
-    binary_string = ''.join(blocks)
-
-    byte_values = [binary_string[i:i + 8] for i in range(0, len(binary_string), 8)]
-
-    # errornous, if first block is 8*'0' - then it gets cut
-    # ascii_characters = [chr(int(byte, 2)) for byte in byte_values if byte != '00000000' and byte != '0000'] # in case the last 8 bits got padded, dont add padded bits
-    ascii_characters = [chr(int(byte, 2)) for byte in byte_values[:-1]] # all bytes except the last one shall be appended no matter if only 0 or not
-
-    last_byte = byte_values[-1]
-    if last_byte != '00000000' and last_byte != '0000': #last byte could be padding byte without information
-        ascii_characters.append(chr(int(last_byte, 2)))
-    
-
-    return ''.join(ascii_characters)
 
 def enc_blocks_to_string(blocks: list[str]):
     binary_string = ''.join(blocks)
 
     byte_values = [binary_string[i:i + 8] for i in range(0, len(binary_string), 8)]
 
-    # errornous, if first block is 8*'0' - then it gets cut
-    # ascii_characters = [chr(int(byte, 2)) for byte in byte_values if byte != '00000000' and byte != '0000'] # in case the last 8 bits got padded, dont add padded bits
-    ascii_characters = [chr(int(byte, 2)) for byte in byte_values[:-1]] # all bytes except the last one shall be appended no matter if only 0 or not
-
-    # last_byte = byte_values[-1]
-    # if last_byte != '00000000' and last_byte != '0000': #last byte could be padding byte without information
-    #     ascii_characters.append(chr(int(last_byte, 2)))
-    
+    ascii_characters = [chr(int(byte, 2)) for byte in byte_values] # all bytes except the last one shall be appended no matter if only 0 or not
 
     return ''.join(ascii_characters)
 
@@ -107,7 +102,7 @@ def encryption(clear_text: str, key: str, rounds: int):
         round_key = generate_roundkey(key, i)
         blocks = [xor(p_box(s_box(block, s_box=sbox_12), p_box=pbox_12), key=round_key) for block in blocks]
 
-    return blocks_to_string(blocks)
+    return enc_blocks_to_string(blocks)
 
 def decryption(cipher_text: str, key: str, rounds: int):
     #do everything in the single rounds in reverse?
