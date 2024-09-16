@@ -1,7 +1,13 @@
-from encryption import blocks_to_string, inverse_p_box, inverse_s_box, p_box, s_box, string_to_blocks, xor
+from encryption import blocks_to_string, decryption, encryption, p_box, s_box, string_to_blocks, xor
 import random
 
 ####### TESTS #######
+
+pbox_12 = [3, 1, 4, 0, 6, 8, 7, 5, 11, 2, 9, 10]
+inverse_pbox_12 = [pbox_12.index(i) for i in range(len(pbox_12))]
+
+sbox_12 = [3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 12, 7, 4, 9, 0, 2]
+inverse_sbox_12 = [sbox_12.index(x) for x in range(16)]
 
 
 def test_string_to_blocks_and_back():
@@ -38,19 +44,19 @@ def test_p_box():
 
     # block with length 12
     block = "110010110101"
-    assert block == inverse_p_box(p_box(block)), "Test 1 failed"
+    assert block == p_box(p_box(block, p_box=pbox_12), p_box=inverse_pbox_12), "Test 1 failed"
 
     # edege case all 0
     block = "000000000000"
-    assert block == inverse_p_box(p_box(block)), "Test all 0 failed"
+    assert block == p_box(p_box(block, p_box=pbox_12), p_box=inverse_pbox_12), "Test all 0 failed"
 
     # edege case all 1
     block = "111111111111"
-    assert block == inverse_p_box(p_box(block)), "Test all 1 failed"
+    assert block == p_box(p_box(block, p_box=pbox_12), p_box=inverse_pbox_12), "Test all 1 failed"
 
     # random block
     block = "".join([str(random.randint(0, 1)) for i in range(12)])
-    assert block == inverse_p_box(p_box(block)), f"Test random block failed for block: {block}"
+    assert block == p_box(p_box(block, p_box=pbox_12), p_box=inverse_pbox_12), f"Test random block failed for block: {block}"
 
     print("All p_box tests passed!")
 
@@ -60,24 +66,26 @@ def test_s_box():
 
     # block with length 12
     block = "110010110101"
-    assert block == inverse_s_box(s_box(block)), "Test 1 failed"
+    assert block == s_box(s_box(block, s_box=sbox_12), s_box=inverse_sbox_12), "Test 1 failed"
 
     # edege case all 0
     block = "000000000000"
-    assert block == inverse_s_box(s_box(block)), "Test all 0 failed"
+    assert block == s_box(s_box(block, s_box=sbox_12), s_box=inverse_sbox_12), "Test all 0 failed"
 
     # edege case all 1
     block = "111111111111"
-    assert block == inverse_s_box(s_box(block)), "Test all 1 failed"
+    assert block == s_box(s_box(block, s_box=sbox_12), s_box=inverse_sbox_12), "Test all 1 failed"
 
     # random block
     block = "".join([str(random.randint(0, 1)) for i in range(12)])
-    assert block == inverse_s_box(s_box(block)), f"Test random block failed for block: {block}"
+    assert block == s_box(s_box(block, s_box=sbox_12), s_box=inverse_sbox_12), f"Test random block failed for block: {block}"
 
     print("All s_box tests passed!")
 
 
 def test_xor():
+    print("\nTest xor")
+
     # basic xor test
     block = "110010110101"
     key = "101011001110"
@@ -89,8 +97,28 @@ def test_xor():
     key = "101011001110"
     assert xor(xor(block, key), key) == block, f"Test invertibility failed: Expected {block}"
 
+
+    print("All xor tests passed!")
+
+
+
+def test_encryption_decryption():
+
+    print("\nTest encryption - decryption")
+
+    input_string: str = "a"
+    key='0111001010001001' #keylength? 
+
+    rounds=3
+
+    encrypted_val = encryption(input_string, key, rounds)
+    decrypted_val = decryption(encrypted_val, key, rounds)
+    assert decrypted_val == input_string, f"Test with input length {len(input_string)} failed"
+
+
+
 # Testaufrufe
-test_string_to_blocks_and_back()
+#test_string_to_blocks_and_back()
 test_p_box()
 test_s_box()
 test_xor()

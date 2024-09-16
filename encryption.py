@@ -8,19 +8,12 @@ sbox_12 = [3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 12, 7, 4, 9, 0, 2] #if splitted in
 inverse_sbox_12 = [sbox_12.index(x) for x in range(16)]
 
 
-def p_box(block):
-    return ''.join(block[i] for i in pbox_12)
-
-def inverse_p_box(block):
-    return ''.join(block[i] for i in inverse_pbox_12)
+def p_box(block, p_box: list[int]):
+    return ''.join(block[i] for i in p_box)
 
 
-def s_box(block):
-    return ''.join(format(sbox_12[int(block[i:i+4], 2)], '04b') for i in range(0, len(block), 4))
-
-def inverse_s_box(block):
-    return ''.join(format(inverse_sbox_12[int(block[i:i+4], 2)], '04b') for i in range(0, len(block), 4))
-
+def s_box(block, s_box: list[int]):
+    return ''.join(format(s_box[int(block[i:i+4], 2)], '04b') for i in range(0, len(block), 4))
 
 
 def xor(block, key):
@@ -64,7 +57,7 @@ def encryption(clear_text: str, key: str, rounds: int):
 
     for i in range(rounds):
         round_key = generate_roundkey(key, i)
-        blocks = [xor(p_box(s_box(block)), key=round_key) for block in blocks]
+        blocks = [xor(p_box(s_box(block, s_box=sbox_12), p_box=pbox_12), key=round_key) for block in blocks]
 
     return blocks_to_string(blocks)
 
@@ -74,6 +67,6 @@ def decryption(cipher_text: str, key: str, rounds: int):
 
     for i in reversed(range(rounds)):
         round_key = generate_roundkey(key, i)
-        blocks = [inverse_s_box(inverse_p_box(xor(block, round_key))) for block in blocks]
+        blocks = [s_box(p_box(xor(block, round_key), p_box=inverse_pbox_12), s_box=inverse_sbox_12) for block in blocks]
 
     return blocks_to_string(blocks)
