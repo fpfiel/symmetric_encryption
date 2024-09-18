@@ -1,5 +1,3 @@
-
-
 #for block length 12
 pbox_12 = [3, 1, 4, 0, 6, 8, 7, 5, 11, 2, 9, 10]
 inverse_pbox_12 = [pbox_12.index(i) for i in range(len(pbox_12))] #iterable.index(x) returns the first index of a value

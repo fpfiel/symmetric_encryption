@@ -1,4 +1,4 @@
-from encryption import blocks_to_string, decryption, enc_blocks_to_string, enc_string_to_blocks, encryption, p_box, s_box, string_to_blocks, xor
+from encryption import blocks_to_string, decryption, encryption, p_box, s_box, string_to_blocks, xor
 import random
 
 ####### TESTS #######
