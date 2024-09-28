@@ -7,6 +7,8 @@ Es ist mit einer Programmier-/Skriptsprache nach Wahl (vorzugsweise Perl) ein pr
 
 Disclaimer: This is a non-optimized algorithm meant only to demonstrate the basic workflow of a symmetric block algorithm. I am aware that various aspects can be improved, such as the use of base64, strings instead of bytearrays, etc.
 
+Python Interpreter >= 3.9. required.
+
 ## Files
 
 ### encryption.py
